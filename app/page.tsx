@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from "react";
 
+type BlobFile = {
+  url: string;
+  pathname: string;
+};
+
+
 export default function Home() {
   const [files, setFiles] = useState<{ url: string; name: string }[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
@@ -10,10 +16,10 @@ export default function Home() {
   useEffect(() => {
     const fetchFiles = async () => {
       const res = await fetch("/api/list");
-      const data = await res.json();
-      setFiles(data.map((f: any) => ({ url: f.url, name: f.pathname })));
-    };
-    fetchFiles();
+      const data: BlobFile[] = await res.json(); // any を避ける
+    setFiles(data.map((f) => ({ url: f.url, name: f.pathname })));
+  };
+  fetchFiles();
   }, []);
 
   // アップロード
