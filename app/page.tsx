@@ -9,7 +9,7 @@ export default function Home() {
   // 初期ロードで一覧取得
   useEffect(() => {
     const fetchFiles = async () => {
-      const res = await fetch("/api/blob/list");
+      const res = await fetch("/api/list");
       const data = await res.json();
       setFiles(data.map((f: any) => ({ url: f.url, name: f.pathname })));
     };
