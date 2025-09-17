@@ -1,11 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [files, setFiles] = useState<{ url: string; name: string }[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
 
+  // 初期ロードで一覧取得
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const res = await fetch("/api/blob/list");
+      const data = await res.json();
+      setFiles(data.map((f: any) => ({ url: f.url, name: f.pathname })));
+    };
+    fetchFiles();
+  }, []);
+
+  // アップロード
   async function handleUpload(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -22,6 +33,7 @@ export default function Home() {
     }
   }
 
+  // 削除
   async function handleDelete(url: string) {
     await fetch("/api/delete", {
       method: "POST",
