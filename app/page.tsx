@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 export default function Home() {
+  const [files, setFiles] = useState<{ url: string; name: string }[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
-  const [url, setUrl] = useState<string | null>(null);
 
   async function handleUpload(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -16,11 +16,25 @@ export default function Home() {
     });
 
     const data = await res.json();
-    if (data.url) setUrl(data.url);
+    if (data.url) {
+      setFiles((prev) => [...prev, { url: data.url, name: data.pathname }]);
+      setPreview(null);
+    }
+  }
+
+  async function handleDelete(url: string) {
+    await fetch("/api/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+
+    setFiles((prev) => prev.filter((f) => f.url !== url));
   }
 
   return (
-    <main className="flex flex-col items-center gap-4 p-8">
+    <main className="flex flex-col items-center gap-6 p-8">
+      {/* アップロードフォーム */}
       <form onSubmit={handleUpload} className="flex flex-col gap-2">
         <input
           type="file"
@@ -39,6 +53,7 @@ export default function Home() {
         </button>
       </form>
 
+      {/* プレビュー */}
       {preview && (
         <div>
           <p>プレビュー:</p>
@@ -46,15 +61,20 @@ export default function Home() {
         </div>
       )}
 
-      {url && (
-        <div>
-          <p>アップロード完了 🎉</p>
-          <a href={url} target="_blank" className="text-blue-500 underline">
-            {url}
-          </a>
-          <img src={url} alt="uploaded" className="max-w-xs rounded-md mt-2" />
-        </div>
-      )}
+      {/* 一覧表示 */}
+      <div className="grid grid-cols-2 gap-4">
+        {files.map((f) => (
+          <div key={f.url} className="relative">
+            <img src={f.url} alt={f.name} className="max-w-xs rounded-md" />
+            <button
+              onClick={() => handleDelete(f.url)}
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full px-2 py-1 text-sm"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
