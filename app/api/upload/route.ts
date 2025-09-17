@@ -10,7 +10,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Blob に保存（公開アクセス可能）
-  const blob = await put(file.name, file, { access: "public" });
+  const blob = await put(file.name, file, {
+    access: "public",
+    token: process.env.BLOB_READ_WRITE_TOKEN, // ← ここで利用
+  });
+
 
   return NextResponse.json({ url: blob.url });
 }
